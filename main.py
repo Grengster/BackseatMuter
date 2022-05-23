@@ -37,19 +37,38 @@ def muteValorant():
             toggleMute = not toggleMute
 
 def changeSettings():
-    global listener, keybind, inSettings
+    global listener, keybind, inSettings, tempval
     inSettings = True
-    os.system('clear')
+    os.system('CLS')
     print("SETTINGS MENU")
     while inSettings:
         tempval = input("To change the keybind, press 1\nTo return, press 2\n:")
         if tempval == "1":
-            keybind = input("Enter your value: ").upper()
-            print(keybind)
+            keybind = input("New keybind: ").upper()
+            print("Keybind successfully set to " + keybind)
         if tempval == "2":
-            os.system('clear')
-            print("Listening for input..")
+            os.system('CLS')
+            
+            mainText()
+            tempval = "";
             inSettings = False
+
+def mainText():
+    global keybind
+    print("Backseat Muter is currently running in the background.")
+    time.sleep(0.5)
+    print("\n---------------------------------")
+    print("| Escape - Quit | F10 - Settings |")
+    print("---------------------------------\n")
+
+    time.sleep(0.5)
+    print("Your current bind is: " + keybind)
+    time.sleep(0.5)
+
+    print("\nListening for input.. ")
+
+
+
 
 # def manualStart():
 #     global listener
@@ -58,12 +77,14 @@ def changeSettings():
 
 # Collecting events until stopped
 def main():
+    print("-------------------------------------")
     print("Thank you for using my backseat muter!")
+    print("-------------------------------------")
     time.sleep(0.5)
     print("The program is starting any second..")
     time.sleep(1)
     print("Successfully started!")
-    print("\nListening for input..")
+    mainText()
     global listener
     with Listener(on_press=listenMuteButton) as listener:
         listener.join()
