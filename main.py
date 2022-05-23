@@ -2,6 +2,7 @@ from pynput.keyboard import Listener
 from pycaw.pycaw import AudioUtilities
 import time
 import os    
+import json
 
 sessions = AudioUtilities.GetAllSessions()
 listener = Listener
@@ -9,6 +10,8 @@ toggleMute = True
 inSettings = False
 keybind = "5"
 letter = ""
+
+
 
 def listenMuteButton(key):
         global letter, listener, keybind, tempval
@@ -29,15 +32,22 @@ def listenMuteButton(key):
             return False
         
 def muteValorant():
+    isRunning = False
     for session in sessions:
         volume = session.SimpleAudioVolume
         if session.Process and session.Process.name() == "RiotClientServices.exe":
-            global toggleMute
+            global toggleMute, keybind
             volume.SetMute(toggleMute, None)
+            config = {"keybind": keybind, "isMuted": toggleMute}
             toggleMute = not toggleMute
+            isRunning = True
+            with open('settings.json', 'w') as f:
+                json.dump(config, f)
+    if not isRunning:
+        print("Valorant not running, please start the game!")
 
 def changeSettings():
-    global listener, keybind, inSettings, tempval
+    global listener, keybind, inSettings, tempval, toggleMute
     inSettings = True
     os.system('CLS')
     print("SETTINGS MENU")
@@ -46,9 +56,11 @@ def changeSettings():
         if tempval == "1":
             keybind = input("New keybind: ").upper()
             print("Keybind successfully set to " + keybind)
+            config = {"keybind": keybind, "isMuted": toggleMute}
+            with open('settings.json', 'w') as f:
+                json.dump(config, f)
         if tempval == "2":
             os.system('CLS')
-            
             mainText()
             tempval = "";
             inSettings = False
@@ -77,6 +89,14 @@ def mainText():
 
 # Collecting events until stopped
 def main():
+    global keybind, toggleMute
+    with open('settings.json', 'r') as f:
+        config = json.load(f)
+
+    #edit the data
+    keybind = config['keybind']
+    toggleMute = config['isMuted']
+
     print("-------------------------------------")
     print("Thank you for using my backseat muter!")
     print("-------------------------------------")
@@ -84,6 +104,8 @@ def main():
     print("The program is starting any second..")
     time.sleep(1)
     print("Successfully started!")
+    if toggleMute:
+        print("It was detected that the valorant voice chat is already muted!")
     mainText()
     global listener
     with Listener(on_press=listenMuteButton) as listener:
